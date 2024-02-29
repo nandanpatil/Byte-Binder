@@ -8,7 +8,7 @@ class Node{
     Node *right;
     
     Node(){
-        val='-';
+        val='~';
         freq=-1;
         left=NULL;
         right=NULL;
@@ -22,7 +22,7 @@ class Node{
     }
 
     Node(unsigned long long int f){
-        val='-';
+        val='~';
         freq=f;
         left=NULL;
         right=NULL;
@@ -44,6 +44,7 @@ class pqComp{
 class Huffman{
     string fileName;
     unordered_map<char,unsigned long long int>frequency;
+    unordered_map<char,string>huffcodes;
     Node *tree;
     public:
     Huffman(string name){
@@ -87,7 +88,10 @@ class Huffman{
         }
 
         tree  = pq.top();
-        levelOrder(tree);        
+        levelOrder(tree);  
+        cout<<endl;
+        string temp="";
+        assignCodes(tree,temp);      
     }
 
     void levelOrder(Node *root){
@@ -107,13 +111,33 @@ class Huffman{
        
     }
 
+    void assignCodes(Node *root,string &temp){
+        if(!root)return;
+        temp+="0";
+        assignCodes(root->left,temp);
+        temp.pop_back();
+        if(root->val!='~'){
+            huffcodes[root->val]=temp;
+        }
+        temp+="1";
+        assignCodes(root->right,temp);
+        temp.pop_back();
+    }
+
+    void printHuffTable(){
+        for(auto it:huffcodes){
+            cout<<it.first<<" "<<it.second<<" "<<endl;
+        }
+    }
+
 };
 
 
 int main()
 {
-    Huffman h("test.txt");
+    Huffman h("sample1.txt");
     h.countFrequency();
     h.createHuffmanTree();
-
+    h.printHuffTable();
+    
 }
