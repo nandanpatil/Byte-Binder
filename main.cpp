@@ -1,9 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-
-
-
 class Node{
     char val;
     unsigned long long int freq;
@@ -109,8 +106,6 @@ class Huffman{
         }
        
     }
-
-
 
 };
 
