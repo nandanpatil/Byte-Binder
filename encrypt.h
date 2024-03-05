@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+
 class Node{
     char val;
     unsigned long long int freq;
@@ -45,10 +46,12 @@ class Huffman{
     unordered_map<char,unsigned long long int>frequency;
     unordered_map<char,string>huffcodes;
     Node *tree;
+    string headerText;
     public:
     Huffman(string name){
         fileName=name;
         tree=NULL;
+        headerText="";
     }
     void countFrequency(){
         fstream file;
@@ -62,6 +65,7 @@ class Huffman{
             for(unsigned long long int i=0;i<line.length();i++){
                 frequency[line[i]]++;
             }
+            frequency[10]++;
         }}
 
     void createHuffmanTree(){
@@ -85,27 +89,36 @@ class Huffman{
         }
 
         tree  = pq.top();
-        levelOrder(tree);  
-        cout<<endl;
         string temp="";
-        assignCodes(tree,temp);      
+        assignCodes(tree,temp); 
+        printHuffTable();
+        serializeTree(tree);       
     }
 
-    void levelOrder(Node *root){
+    void serializeTree(Node *root){
         queue<Node*>q;
         q.push(root);
         while(!q.empty()){
-            unsigned long long int size = q.size();
-            for(unsigned long long int i=0;i<size;i++){
-                Node *src = q.front();
-                q.pop();
-                cout<<"["<<src->val<<","<<src->freq<<"]"<<" ";
-                if(src->left)q.push(src->left);
-                if(src->right)q.push(src->right);
+            Node* x = q.front();
+            q.pop();
+            if(x==NULL)headerText+="~~,";
+            else{
+                string txt="";
+                if(x->val=='\n'){
+                    txt+="nn";
+                }
+                else{
+                txt+=x->val;
+                }
+                txt+=',';
+                headerText+=txt;
             }
-             cout<<endl;
+            if(x){
+                q.push(x->left);
+                q.push(x->right);
+            }
         }
-       
+        headerText+="~~~,";
     }
 
     void assignCodes(Node *root,string &temp){
@@ -130,14 +143,63 @@ class Huffman{
     void encrypt(){
         fstream file,output;
         file.open(fileName,ios::in);
-        output.open("output.txt",ios::binary|ios::out);
 
         string line;
+        string binaryString="";
         while(getline(file,line)){
             for(int i=0;i<line.length();i++){
-                output<<huffcodes[line[i]];
+                char c = line[i];
+                binaryString+=huffcodes[c];
             }
+            binaryString+=huffcodes['\n'];
         }
+        writeHeader("output.cmp",headerText);
+        writeToFile(binaryString,"output.cmp");
     }
+
+void writeToFile(const string& binaryString, const string& filename){
+      ofstream outFile(filename, ios::binary|ios::app);
+
+    if (!outFile) {
+        std::cerr << "Failed to open the file." << std::endl;
+        return;
+    }
+
+    for (size_t i = 0; i < binaryString.length(); i += 8) {
+        std::string byteString = binaryString.substr(i, 8);
+        char byte = static_cast<char>(std::stoi(byteString, nullptr, 2));
+        outFile.write(&byte, 1);
+    }
+    outFile.close();
+    }
+
+    void writeHeader(const string& filename, const string& text) {
+   ofstream binaryFile(filename, ios::out | ios::binary);
+
+    if (!binaryFile.is_open()) {
+        cerr << "Error: Unable to open file for writing." << endl;
+        return;
+    }
+
+    binaryFile.write(text.data(), text.size());
+    binaryFile.close();
+
+}
+
+void levelOrder(){
+    queue<Node*>q;
+    q.push(tree);
+    while(!q.empty()){
+        int size = q.size();
+        for(int i=0;i<size;i++){
+            Node *x =q.front();
+            q.pop();
+            cout<<x->val<<" ";
+            if(x->left)q.push(x->left);
+            if(x->right)q.push(x->right);
+        }
+        cout<<endl;
+    }
+}
 
 };
